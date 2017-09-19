@@ -1,7 +1,7 @@
 #Area Calculator
-#script goes to G Production Data and opens parivate parcels, gov lands, possible access layers
+#script goes to G Production Data and opens private parcels, gov lands, possible access layers
 #counts the private parcels and logs it
-#sums the Area Acres field of gov lands and possible access and logs it
+#sums the Area Acres field of gov lands and then does the same of possible access and logs them both
 #Tom Hoober - Sept 2017
 
 import arcpy, os, sys, datetime, logging, numpy
