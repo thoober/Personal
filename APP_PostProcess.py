@@ -28,15 +28,16 @@ StateFull = stateTar[State] #OLD MANUAL ENTRY
 # SECONDARY variables, which may need to changed\\verified (but hopefully not) ahead of running this script
 networkDirectory = 'G:/Products/ArcServer/'
 networkPath = networkDirectory + 'PRODUCTION_DATA/'+State + '/'
-handoffDirectory = networkDirectory+"PRODUCTION_DATA/!Handoff/"
+handoffDirectory = networkDirectory+"PRODUCTION_DATA/!Handoff/" # what will this be?
 networkNewData = networkDirectory+"/Data_State/"+State
 
-LocalDirectory = 'D:/APP/' #NEEDS to be set to whatever the SD file extract is
-localPath = LocalDirectory + State + '/'
-scriptingPath = LocalDirectory+'!Scripting/'
-mtemplatePath = LocalDirectory+'!MasterPublishTemplate/'
-maskclipGDB = scriptingPath+'ClipMask/ClipMask_Tiger2013.gdb'
-adminBounds = maskclipGDB+'/Clip/'+StateFull
+LocalDirectory = 'D:/sd-files/staging/' #NEEDS to be set to whatever the SD file extract is
+##localPath = LocalDirectory + State + '/' #no longer needed
+handoffDirectory = LocalDirectory+"PRODUCTION_DATA/!Handoff/" # what will this be?
+scriptingPath = LocalDirectory+'!Scripting/' #is this needed?
+mtemplatePath = LocalDirectory+'!MasterPublishTemplate/' #is this needed?
+maskclipGDB = scriptingPath+'ClipMask/ClipMask_Tiger2013.gdb' #is this needed?
+adminBounds = maskclipGDB+'/Clip/'+StateFull #is this needed?
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 #Gather timestamps and old versions#
