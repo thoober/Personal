@@ -1,3 +1,7 @@
+#copyright onXmaps 2017
+#written by tom h, ross c, nate b, landon s
+
+
 # Import system modules
 import datetime, arcpy, os, logging
 from arcpy import env					# From Arcpy, import environmental variable
