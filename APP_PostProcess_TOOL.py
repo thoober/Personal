@@ -22,9 +22,14 @@ arcpy.env.outputZFlag = "Disabled"		# Disables Z-values
 arcpy.env.outputMFlag = "Disabled"		# Disables M-values
 
 # PRIMARY variables, which must be changed/verified ahead of running this script
-State= arcpy.GetParameterAsText(0) #CA
-Version = arcpy.GetParameterAsText(1) #'160'
-sdFile = arcpy.GetParameterAsText(2)#"D:\sd-files\live\20170801_SouthDakota_170.sd"
+##State= arcpy.GetParameterAsText(0) #CA
+##Version = arcpy.GetParameterAsText(1) #'160'
+##sdFile = arcpy.GetParameterAsText(2)#"D:\sd-files\live\20170801_SouthDakota_170.sd"
+
+#FOR TESTING
+State= "CO"
+Version = "TESTING"
+sdFile = "D:\sd-files\live\20170904_Colorado_1711.sd"
 
 
 stateTar = {'AK': 'Alaska','AL': 'Alabama','AR': 'Arkansas','AS': 'AmericanSamoa','AZ': 'Arizona','CA': 'California','CO': 'Colorado','CT': 'Connecticut','DC': 'DistrictOfColumbia','DE': 'Delaware','FL': 'Florida','GA': 'Georgia','GU': 'Guam','HI': 'Hawaii','IA': 'Iowa','ID': 'Idaho','IL': 'Illinois','IN': 'Indiana','KS': 'Kansas','KY': 'Kentucky','LA': 'Louisiana','MA': 'Massachusetts','MD': 'Maryland','ME': 'Maine','MI': 'Michigan','MN': 'Minnesota','MO': 'Missouri','MP': 'NorthernMarianaIslands','MS': 'Mississippi','MT': 'Montana_Yellowstone','NA': 'National','NC': 'NorthCarolina','ND': 'NorthDakota','NE': 'Nebraska','NH': 'NewHampshire','NJ': 'NewJersey','NM': 'NewMexico','NV': 'Nevada','NY': 'NewYork','OH': 'Ohio','OK': 'Oklahoma','OR': 'Oregon','PA': 'Pennsylvania','PR': 'PuertoRico','RI': 'RhodeIsland','SC': 'SouthCarolina','SD': 'SouthDakota','TN': 'Tennessee','TX': 'Texas','UT': 'Utah','VA': 'Virginia','VI': 'VirginIslands','VT': 'Vermont','WA': 'Washington','WI': 'Wisconsin','WV': 'WestVirginia','WY': 'Wyoming_Yellowstone'}
@@ -34,67 +39,81 @@ arcpy.AddMessage("Processing "+StateFull.upper())
 arcpy.AddMessage('--------------------------------')
 
 appDirectory = sdFile.split("live",1)[0:-1]
-landHandoffDirectory = appDirectory+"\\handoff\\lands\\"
-gmuHandoffDirectory = appDirectory+"\\handoff\\gmu\\"
-oldExtractsDirectory = appDirectory+"\\staging\v101"
-templateDirectory = appDirectory+"\\mastertemplate\\"
+landHandoffDirectory = appDirectory[0]+"handoff\\lands\\"
+gmuHandoffDirectory = appDirectory[0]+"handoff\\gmu\\"
+oldExtractsDirectory = appDirectory[0]+"staging\\v101\\"
+templateDirectory = appDirectory[0]+"mastertemplate\\"
+
 
 #finding Handoff information for newest target state
 landHandoffFiles = os.listdir(landHandoffDirectory)
-for targetFile in sorted(handoffFiles,reverse=True):
+for targetFile in sorted(landHandoffFiles,reverse=True):
 	stateTar = targetFile.split('_')[1]
 	if stateTar==State: #if the handoff state is equal to the defined state
 		DateStamp_HandoffGDB = targetFile.split('_')[0]
 		HandoffGDB = targetFile
-		arcpy.AddMessage(State+ " Handoff GDB located,datestamp : "+handoffGDBdate)
+		arcpy.AddMessage(State+ " Handoff GDB located,datestamp : "+DateStamp_HandoffGDB)
+##		print State+ " Handoff GDB located,datestamp : "+DateStamp_HandoffGDB
 		break
 #DateStamp_HandoffGDB = '20151104' - OLD MANUAL ENTRY
-arcpy.AddMessage ("HANDOFF GDB: "+HandoffGDB)
-
+arcpy.AddMessage ("\tHANDOFF GDB: "+HandoffGDB)
+##print "\tHANDOFF GDB: "+HandoffGDB
+handoffGDBpath = landHandoffDirectory+HandoffGDB
 
 #finding old GDB information
 oldPubList = os.listdir(oldExtractsDirectory)
-for oldGDB in sorted(oldPubList,reverse=True):
-	if oldGDB.endswith("Publish.gdb"):
-		DateStamp_OldePublishGDB = oldGDB.split('_')[0]
-		OldePublishGDB=oldGDB
-		arcpy.AddMessage(State+ " Old Publish GDB located,datestamp : "+oldGDBdate)
+for oldPub in sorted(oldPubList,reverse=True):
+	oldStates = oldPub.split('_')[1]
+	if oldStates.upper()==State:
+		DateStamp_OldePublishGDB = oldPub.split('_')[0]
+		OldePublishGDB = oldPub
+		arcpy.AddMessage(State+ " Old Publish GDB located,datestamp : "+DateStamp_OldePublishGDB)
+##		print State+ " Old Publish GDB located,datestamp : "+DateStamp_OldePublishGDB
 		break
-#DateStamp_OldePublishGDB = '20140403' - OLD MANUAL ENTRY
-arcpy.AddMessage ("\tOLD GDB: "+OldePublishGDB)
+arcpy.AddMessage ("\tOld GDB: "+OldePublishGDB)
+##print "\tOld GDB: "+OldePublishGDB
+OldePublishGDBpath = oldExtractsDirectory+OldePublishGDB
 
 #finding old MXD information
-for oldMXD in sorted(oldPubList,reverse=True):
-	if oldMXD.endswith(".mxd"):
-		DateStamp_OldePublishMXD = oldMXD.split('_')[0]
-		Version_OldePublishMXD = (oldMXD.split('_')[2]).split('.')[0]
-		OldePublishMXD=oldMXD
+oldPubList = os.listdir(oldExtractsDirectory)
+for oldPub in sorted(oldPubList,reverse=True):
+	oldStates2 = oldPub.split('_')[1]
+	if oldStates2==StateFull:
+		DateStamp_OldePublishMXD = oldPub.split('_')[0]
+		Version_OldePublishMXD = (oldPub.split('_')[2]).split('.')[0]
+		OldePublishMXD = oldPub
 		arcpy.AddMessage(State+ " Old Publish MXD located,datestamp : "+DateStamp_OldePublishMXD+",version # : "+Version_OldePublishMXD)
+##		print State+ " Old Publish MXD located,datestamp : "+DateStamp_OldePublishMXD+",version # : "+Version_OldePublishMXD
 		break
-#DateStamp_OldePublishMXD = '20140403' - OLD MANUAL ENTRY
-#Version_OldePublishMXD = '140' - OLD MANUAL ENTRY
-arcpy.AddMessage ("\tOLD MXD: "+OldePublishMXD)
-
+arcpy.AddMessage ("\tOld MXD: "+OldePublishMXD)
+##print "\tOld MXD: "+OldePublishMXD
+OldePublishMXDpath = oldExtractsDirectory+OldePublishMXD
 
 #finding master template info
 templateList = os.listdir(templateDirectory)
 for mTemplateMXD in sorted (templateList,reverse=True):
-	if mTemplateMXD.endwith('.mxd'):
-		Datestamp_MasterPublishTemplate = templateMXD.split('_')[0]
+	if mTemplateMXD.endswith('.mxd'):
+		Datestamp_MasterPublishTemplate = mTemplateMXD.split('_')[0]
 		TemplateMXD = mTemplateMXD
-		arcpy.AddMessage("Master Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate)
+		arcpy.AddMessage("\tMaster Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate)
+##		print "Master Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate
 		break
 #Datestamp_MasterPublishTemplate = #'20160628' - OLD MANUAL ENTRY
-arcpy.AddMessage ("MASTER TEMPLATE: "+TemplateMXD)
+arcpy.AddMessage ("MASTER TEMPLATE: "+mTemplateMXD)
+##print "\tMASTER TEMPLATE MXD: "+mTemplateMXD
+mTemplateMXDpath=templateDirectory+mTemplateMXD
 
 for mTemplateGDB in sorted (templateList,reverse=True):
-	if mTemplateGDB.endwith('.gdb'):
-		Datestamp_MasterPublishTemplate = templateGDB.split('_')[0]
+	if mTemplateGDB.endswith('.gdb'):
+		Datestamp_MasterPublishTemplate = mTemplateGDB.split('_')[0]
 		TemplateGDB = mTemplateGDB
-		arcpy.AddMessage("Master Template gdb located, datestamp : "+Datestamp_MasterPublishTemplate)
+		arcpy.AddMessage("\tMaster Template gdb located, datestamp : "+Datestamp_MasterPublishTemplate)
+##		print "Master Template gdb located, datestamp : "+Datestamp_MasterPublishTemplate
 		break
 #Datestamp_MasterPublishTemplate = #'20160628' - OLD MANUAL ENTRY
-arcpy.AddMessage ("MASTER TEMPLATE: "+TemplateGDB)
+arcpy.AddMessage ("MASTER TEMPLATE: "+mTemplateGDB)
+##print "\tMASTER TEMPLATE GDB: "+mTemplateGDB
+mTemplateGDB=templateDirectory+mTemplateGDB
 
 today = datetime.date.today()
 DateStamp_Today = today.strftime('%Y%m%d')
@@ -106,7 +125,7 @@ DateStamp_Today = today.strftime('%Y%m%d')
 ##scripting_directory = 'D:/APP/!Scripting/'
 ##maskclip_gdb = scripting_directory+'ClipMask/ClipMask_Tiger2013.gdb'
 #LocalDirectory = 'D:/APP/' -- DEFINED ABOVE
-local_path = appDirectory + State + '\\'
+local_path = appDirectory[0] + State + '\\'
 ##admin_bounds = maskclip_gdb+'/Clip/'+StateFull
 
 # TERTIARY variables, which do not need to be changed/verified ahead of running this script
@@ -126,7 +145,7 @@ arcpy.AddMessage('--------------------------------')
 arcpy.AddMessage('FOLDERS AND GEODATABASE CREATION; DATA COPYING')
 # Create a folder in the local working directory for the state of interest, if it doesn't already exist
 if not arcpy.Exists(local_path):
-	arcpy.CreateFolder_management(appDirectory,State)
+	arcpy.CreateFolder_management(appDirectory[0],State)
 	arcpy.AddMessage(local_path+' directory created, because it did not exist previously')
 
 # Copy OldePublishMXD from G:/ to local, if it doesn't exist already
@@ -162,18 +181,21 @@ GMUs_OldePublishGDB = OldePublishGDB+ '/GMUs'
 if arcpy.Exists(GMUs_OldePublishGDB):
 	arcpy.CreateFeatureDataset_management(HandoffGDB, "GMUs", WebMercator)
 	arcpy.AddMessage('/"GMUs" feature dataset created, becasue it exists in the OldePublishGDB')
+	print '/"GMUs" feature dataset created, becasue it exists in the OldePublishGDB'
 
 # /GMU/
 GMU_OldePublishGDB = OldePublishGDB+ '/GMU' 
 if arcpy.Exists(GMU_OldePublishGDB):
 	arcpy.CreateFeatureDataset_management(HandoffGDB, "GMUs", WebMercator)
 	arcpy.AddMessage('/"GMU" feature dataset created, becasue it exists in the OldePublishGDB')
+	print '/"GMU" feature dataset created, becasue it exists in the OldePublishGDB'
 
 # /Other/
 Other_OldePublishGDB = OldePublishGDB+ '/Other' 
 if arcpy.Exists(Other_OldePublishGDB):
 	arcpy.CreateFeatureDataset_management(HandoffGDB, "Other", WebMercator)
 	arcpy.AddMessage('/"Other" feature dataset created, becasue it exists in the OldePublishGDB')
+	print '/"Other" feature dataset created, becasue it exists in the OldePublishGDB'
 
 # /PLSS/ -> /Sections/
 # If they exist, read from OldePublishGDB and write to HandoffGDB
@@ -187,7 +209,8 @@ if arcpy.Exists(OldePublish_SectionLines):
 	arcpy.AddMessage('/"Sections" feature dataset created')
 	arcpy.FeatureClassToFeatureClass_conversion(OldePublish_SectionLines, HandoffGDB+'/Sections/','SectionBoundaries')
 #	arcpy.Clip_analysis(OldePublish_SectionLines, admin_bounds, Handoff_SectionLines)  -- NO MORE CLIPPING
-#	arcpy.AddMessage('SectionLines feature class copied from OldePublishGDB to HandoffGDB')
+	arcpy.AddMessage('SectionLines feature class copied from OldePublishGDB to HandoffGDB')
+	print 'SectionLines feature class copied from OldePublishGDB to HandoffGDB'
 if not arcpy.Exists(OldePublish_SectionLines):
 	arcpy.AddMessage('\tA "Section" line feature in a "PLSS" feature dataset does not exist in the old GDB.')
 
@@ -196,8 +219,9 @@ if arcpy.Exists(OldePublish_BoundaryLines):    #code block added 092016 to handl
 	arcpy.CreateFeatureDataset_management(HandoffGDB, "Sections", WebMercator)
 	arcpy.FeatureClassToFeatureClass_conversion(OldePublish_BoundaryLines, HandoffGDB+'/Sections/','SectionBoundaries')
 	arcpy.AddMessage('/"Sections" feature dataset created')
-#	arcpy.Clip_analysis(OldePublish_BoundaryLines, admin_bounds, Handoff_SectionLines)
+#	arcpy.Clip_analysis(OldePublish_BoundaryLines, admin_bounds, Handoff_SectionLines)  -- NO MORE CLIPPING
 	arcpy.AddMessage('BoundaryLines feature class copied from OldePublishGDB to HandoffGDB')
+	print 'BoundaryLines feature class copied from OldePublishGDB to HandoffGDB'
 if not arcpy.Exists(OldePublish_BoundaryLines):
 	arcpy.AddMessage('\tA "Boundary" line feature in a "PLSS" feature dataset does not exist in the old GDB.')
 
@@ -209,7 +233,8 @@ if arcpy.Exists(OldePublish_SectionAreas):
 	arcpy.CreateFeatureDataset_management(HandoffGDB, "Sections", WebMercator)
 	arcpy.AddMessage('/"Sections" feature dataset created')
 	arcpy.FeatureClassToFeatureClass_conversion(OldePublish_SectionAreas, HandoffGDB+'/Sections/','SectionAreas')
-#	arcpy.Clip_analysis(OldePublish_SectionAreas, admin_bounds, Handoff_SectionAreas)
+	print 'SectionAreas feature class copied from OldePublishGDB to HandoffGDB'
+#	arcpy.Clip_analysis(OldePublish_SectionAreas, admin_bounds, Handoff_SectionAreas)  -- NO MORE CLIPPING
 	#arcpy.AddMessage('SectionAreas feature class copied from OldePublishGDB to HandoffGDB')
 
 # /Sections/ -> /Sections/
@@ -223,8 +248,9 @@ if arcpy.Exists(OldePublish_SectionLines2):
 	arcpy.CreateFeatureDataset_management(HandoffGDB, "Sections", WebMercator)
 	arcpy.AddMessage('/"Sections" feature dataset created')
 	arcpy.FeatureClassToFeatureClass_conversion(OldePublish_SectionLines2, HandoffGDB+'/Sections/','SectionBoundaries')
-	#arcpy.Clip_analysis(OldePublish_SectionLines2, admin_bounds, Handoff_SectionLines2)
+	#arcpy.Clip_analysis(OldePublish_SectionLines2, admin_bounds, Handoff_SectionLines2)  -- NO MORE CLIPPING
 	arcpy.AddMessage('SectionLines feature class copied from OldePublishGDB to HandoffGDB')
+	print 'SectionLines feature class copied from OldePublishGDB to HandoffGDB'
 if not arcpy.Exists(OldePublish_SectionLines):
 	arcpy.AddMessage('\tA "Section" line feature in a "Sections" feature dataset does not exist in the old GDB.')
 
@@ -233,8 +259,9 @@ if arcpy.Exists(OldePublish_BoundaryLines2):    #code block added 092016 to hand
 	arcpy.CreateFeatureDataset_management(HandoffGDB, "Sections", WebMercator)
 	arcpy.AddMessage('/"Sections" feature dataset created')
 	arcpy.FeatureClassToFeatureClass_conversion(OldePublish_BoundaryLines2, HandoffGDB+'/Sections/','SectionBoundaries')
-	#arcpy.Clip_analysis(OldePublish_BoundaryLines2, admin_bounds, Handoff_SectionLines2)
-	arcpy.AddMessage('BouindaryLines feature class copied from OldePublishGDB to HandoffGDB')
+	#arcpy.Clip_analysis(OldePublish_BoundaryLines2, admin_bounds, Handoff_SectionLines2)  -- NO MORE CLIPPING
+	arcpy.AddMessage('BoundaryLines feature class copied from OldePublishGDB to HandoffGDB')
+	print 'BoundaryLines feature class copied from OldePublishGDB to HandoffGDB'
 if not arcpy.Exists(OldePublish_BoundaryLines2):
 	arcpy.AddMessage('\tA "Boundary" line feature in a "Sections" feature dataset does not exist in the old GDB.')
 
@@ -247,8 +274,9 @@ if arcpy.Exists(OldePublish_SectionAreas2):
 	arcpy.CreateFeatureDataset_management(HandoffGDB, "Sections", WebMercator)
 	arcpy.AddMessage('/"Sections" feature dataset created')
 	arcpy.FeatureClassToFeatureClass_conversion(OldePublish_SectionAreas2, HandoffGDB+'/Sections/','SectionAreas')
-#	arcpy.Clip_analysis(OldePublish_SectionAreas2, admin_bounds, Handoff_SectionAreas2)
+#	arcpy.Clip_analysis(OldePublish_SectionAreas2, admin_bounds, Handoff_SectionAreas2)  -- NO MORE CLIPPING
 	arcpy.AddMessage('SectionAreas feature class copied from OldePublishGDB to HandoffGDB')
+	print 'SectionAreas feature class copied from OldePublishGDB to HandoffGDB'
 
 
 arcpy.AddMessage('FEATURE DATASET/FEATURE CLASS COPYING [OldePublishGDB -> HandoffGDB] COMPLETE')
@@ -260,16 +288,19 @@ arcpy.AddMessage('WILDERNESS AREAS/BOUNDARIES PROCESSING')
 # /Wilderness/
 # If they exist, import the wilderness lines and areas into the HandoffGDB from the GIS drive
 ##Wilderness_Lines = 'G:/Data_State/'+State+'/Wilderness/Complete/'+State+'_Wilderness_Boundaries.shp'
-Wilderness_Lines_HandoffGDB = HandoffGDB+'/Wilderness/'+State+'_Wilderness_Boundaries'
-Wilderness_Lines_OldePublishGDB = OldePublishGDB+'/Wilderness/'+State+'_Wilderness_Boundaries'
+Wilderness_Lines_HandoffGDB = landHandoffDirectory+HandoffGDB+'/Wilderness/'+State+'_Wilderness_Boundaries'
+Wilderness_Lines_OldePublishGDB = oldExtractsDirectory+OldePublishGDB+'/Wilderness/'+State+'_Wilderness_Boundaries'
 if arcpy.Exists(Wilderness_Lines_OldePublishGDB):
 	# Create a feature dataset to house the wilderness lines and areas
-	arcpy.CreateFeatureDataset_management(HandoffGDB,"Wilderness",WebMercator)
+	arcpy.CreateFeatureDataset_management(landHandoffDirectory+HandoffGDB,"Wilderness",WebMercator)
 	arcpy.AddMessage('/"Wilderness" feature dataset created')
-	arcpy.FeatureClassToFeatureClass_conversion(Wilderness_Lines_OldePublishGDB, HandoffGDB+'/Wilderness/', State+'_Wilderness_Boundaries')
-	arcpy.AddMessage('Wilderness lines imported into the HandoffGDB from the GIS drive')
+	print "Wilderness feature dataset created"
+	arcpy.FeatureClassToFeatureClass_conversion(Wilderness_Lines_OldePublishGDB, landHandoffDirectory+HandoffGDB+'/Wilderness/', State+'_Wilderness_Boundaries')
+	arcpy.AddMessage('Wilderness lines imported into the HandoffGDB from the Old Publish GDB')
+	print 'Wilderness lines imported into the HandoffGDB from the GIS drive from the Old Publish GDB'
 if not arcpy.Exists(Wilderness_Lines_OldePublishGDB):
-	arcpy.AddMessage('\tNo Wilderness Lines exist on the network @ G:/Data_State/'+State+'/Wilderness/Complete/')
+	arcpy.AddMessage('\tNo Wilderness Lines exist in the old GDB')
+	
 	
 # If they exist, import the wilderness lines and areas into the HandoffGDB from the GIS drive
 ##Wilderness_Areas = 'G:/Data_State/'+State+'/Wilderness/Complete/'+State+'_Wilderness_Areas.shp'
@@ -278,9 +309,9 @@ Wilderness_Areas_OldePublishGDB = OldePublishGDB+'/Wilderness/'+State+'_Wilderne
 # If they exist, import the wilderness lines and areas into the HandoffGDB from the GIS drive
 if arcpy.Exists(Wilderness_Areas_OldePublishGDB):
 	arcpy.FeatureClassToFeatureClass_conversion(Wilderness_Areas_OldePublishGDB, HandoffGDB+'/Wilderness/', State+'_Wilderness_Areas')
-	arcpy.AddMessage('Wilderness areas imported into the HandoffGDB from the GIS drive')
+	arcpy.AddMessage('Wilderness areas imported into the HandoffGDB from the Old Publish GDB')
 if not arcpy.Exists(Wilderness_Areas_OldePublishGDB):
-	arcpy.AddMessage('\tNo Wilderness Areas exist on the network @ G:/Data_State/'+State+'/Wilderness/Complete/')
+	arcpy.AddMessage('\tNo Wilderness Areas exist in the old GDB')
 
 arcpy.AddMessage('WILDERNESS AREAS/BOUNDARIES PROCESSING COMPLETE')
 arcpy.AddMessage('--------------------------------')
@@ -289,27 +320,37 @@ arcpy.AddMessage('--------------------------------')
 arcpy.AddMessage('GEODATABASE REPLICATION; arcpy.mapping MAGICS')
 
 # Duplicate the HandoffGDB to become the PublishGDB
-arcpy.Copy_management(HandoffGDB,PublishGDB)
+publishDirectory = appDirectory[0]+State
+arcpy.Copy_management(landHandoffDirectory+HandoffGDB,PublishGDB)
 arcpy.AddMessage('HandoffGDB duplicated into PublishGDB')
-
-# Arcpy.mapping, bitches!
-mxd = arcpy.mapping.MapDocument(TemplateMXD)
-mxd.replaceWorkspaces(TemplateGDB, "FILEGDB_WORKSPACE", PublishGDB, "FILEGDB_WORKSPACE")
-
-for lyr in arcpy.mapping.ListLayers(mxd):
-    if lyr.name== "Wilderness Boundaries":
-       lyr.replaceDataSource(PublishGDB, "FILEGDB_WORKSPACE", State+'_Wilderness_Boundaries')
-    if lyr.name== "Wilderness Areas":
-       lyr.replaceDataSource(PublishGDB, "FILEGDB_WORKSPACE", State+'_Wilderness_Areas')
-
-mxd.saveACopy(PublishMXD)
-arcpy.AddMessage('TemplateMXD used to create the new PublishMXD for '+StateFull)
-
-# Open that recently created PublishMXD to begin manual inspection of the data
-# And the OldePublishMXD to compare the PublishMXD to
-os.startfile(OldePublishMXD)
-os.startfile(PublishMXD)
-arcpy.AddMessage("Wasn't that sweet! Those ArcMaps opened magically all on their own, dude!")
-
-arcpy.AddMessage('GEODATABASE REPLICATION; arcpy.mapping MAGICS COMPLETE')
-arcpy.AddMessage('--------------------------------')
+##
+### Arcpy.mapping, bitches!
+##mxd = arcpy.mapping.MapDocument(templateDirectory+mTemplateMXD)
+##mxd.replaceWorkspaces(templateDirectory+mTemplateGDB, "FILEGDB_WORKSPACE", PublishGDB, "FILEGDB_WORKSPACE",False)
+##
+##if arcpy.Exists(HandoffGDB+'/Wilderness/')
+##	for lyr in arcpy.mapping.ListLayers(mxd):
+##		if lyr.name== "Wilderness Boundaries":
+##		   lyr.replaceDataSource(PublishGDB, "FILEGDB_WORKSPACE", State+'_Wilderness_Boundaries')
+##		if lyr.name== "Wilderness Areas":
+##		   lyr.replaceDataSource(PublishGDB, "FILEGDB_WORKSPACE", State+'_Wilderness_Areas')
+##
+##if arcpy.Exists(HandoffGDB+'/Sections/')
+##	for layer in arpy.mapping.ListLayers(mxd):
+##		if layer.name=="Section_Boundaries":
+##			layer.replaceDataSource(PublishGDB, "FILEGDB_WORKSPACE",Section_Boundaries)
+##		if layer.name=="Section_Areas":
+##			layer.replaceDataSource(PublishGDB, "FILEGDB_WORKSPACE",Section_Areas)
+##
+##mxd.saveACopy(PublishMXD)
+##arcpy.AddMessage('TemplateMXD used to create the new PublishMXD for '+StateFull)
+####print 'TemplateMXD used to create the new PublishMXD for '+StateFull
+##
+### Open that recently created PublishMXD to begin manual inspection of the data
+### And the OldePublishMXD to compare the PublishMXD to
+##os.startfile(oldExtractsDirectory+OldePublishMXD)
+##os.startfile(PublishMXD)
+##arcpy.AddMessage("Wasn't that sweet! Those ArcMaps opened magically all on their own, dude!")
+##
+##arcpy.AddMessage('GEODATABASE REPLICATION; arcpy.mapping MAGICS COMPLETE')
+##arcpy.AddMessage('--------------------------------')
