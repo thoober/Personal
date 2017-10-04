@@ -22,18 +22,16 @@ arcpy.env.outputZFlag = "Disabled"		# Disables Z-values
 arcpy.env.outputMFlag = "Disabled"		# Disables M-values
 
 # PRIMARY variables, which must be changed/verified ahead of running this script
-##State= arcpy.GetParameterAsText(0) #CA
 Version = arcpy.GetParameterAsText(0) #'160'
 sdFile = arcpy.GetParameterAsText(1)#"D:\sd-files\live\20170801_SouthDakota_170.sd"
+today = datetime.date.today()
+DateStamp_Today = today.strftime('%Y%m%d')
 
 #FOR TESTING
-##State= "CO"
 ##Version = "TESTING"
 ##sdFile = "C:\sd-files\staging\20170725_Wyoming_Yellowstone_1711.sd"
 
 sdState= sdFile.split('_')[1]
-##arcpy.AddMessage(sdState)
-##print sdState
 if sdState == "Wyoming":
 	StateFull = 'Wyoming_Yellowstone'
 else:
@@ -44,10 +42,7 @@ arcpy.AddMessage("Target State is "+StateFull)
 ##stateTar = {'AK': 'Alaska','AL': 'Alabama','AR': 'Arkansas','AS': 'AmericanSamoa','AZ': 'Arizona','CA': 'California','CO': 'Colorado','CT': 'Connecticut','DC': 'DistrictOfColumbia','DE': 'Delaware','FL': 'Florida','GA': 'Georgia','GU': 'Guam','HI': 'Hawaii','IA': 'Iowa','ID': 'Idaho','IL': 'Illinois','IN': 'Indiana','KS': 'Kansas','KY': 'Kentucky','LA': 'Louisiana','MA': 'Massachusetts','MD': 'Maryland','ME': 'Maine','MI': 'Michigan','MN': 'Minnesota','MO': 'Missouri','MP': 'NorthernMarianaIslands','MS': 'Mississippi','MT': 'Montana','NA': 'National','NC': 'NorthCarolina','ND': 'NorthDakota','NE': 'Nebraska','NH': 'NewHampshire','NJ': 'NewJersey','NM': 'NewMexico','NV': 'Nevada','NY': 'NewYork','OH': 'Ohio','OK': 'Oklahoma','OR': 'Oregon','PA': 'Pennsylvania','PR': 'PuertoRico','RI': 'RhodeIsland','SC': 'SouthCarolina','SD': 'SouthDakota','TN': 'Tennessee','TX': 'Texas','UT': 'Utah','VA': 'Virginia','VI': 'VirginIslands','VT': 'Vermont','WA': 'Washington','WI': 'Wisconsin','WV': 'WestVirginia','WY': 'Wyoming_Yellowstone'}
 stateDic = { 'Alaska':'AK', 'Alabama':'AL', 'Arkansas':'AR', 'AmericanSamoa':'AS', 'Arizona':'AZ', 'California':'CA', 'Colorado':'CO', 'Connecticut':'CT', 'DistrictOfColumbia':'DC', 'Delaware':'DE', 'Florida':'FL', 'Georgia':'GA', 'Guam':'GU', 'Hawaii':'HI', 'Iowa':'IA', 'Idaho':'ID', 'Illinois':'IL', 'Indiana':'IN', 'Kansas':'KS', 'Kentucky':'KY', 'Louisiana':'LA', 'Massachusetts':'MA', 'Maryland':'MD', 'Maine':'ME', 'Michigan':'MI', 'Minnesota':'MN', 'Missouri':'MO', 'NorthernMarianaIslands':'MP', 'Mississippi':'MS', 'Montana':'MT', 'National':'NA', 'NorthCarolina':'NC', 'NorthDakota':'ND', 'Nebraska':'NE', 'NewHampshire':'NH', 'NewJersey':'NJ', 'NewMexico':'NM', 'Nevada':'NV', 'NewYork':'NY', 'Ohio':'OH', 'Oklahoma':'OK', 'Oregon':'OR', 'Pennsylvania':'PA', 'PuertoRico':'PR', 'RhodeIsland':'RI', 'SouthCarolina':'SC', 'SouthDakota':'SD', 'Tennessee':'TN', 'Texas':'TX', 'Utah':'UT', 'Virginia':'VA', 'VirginIslands':'VI', 'Vermont':'VT', 'Washington':'WA', 'Wisconsin':'WI', 'WestVirginia':'WV', 'Wyoming_Yellowstone':'WY'}
 stateAbbr=stateDic[StateFull]
-
-arcpy.AddMessage('--------------------------------')
-arcpy.AddMessage("Processing "+StateFull.upper())
-arcpy.AddMessage('--------------------------------')
+##arcpy.AddMessage(stateAbbr)
 
 appDirectory = sdFile.split("staging",1)[0:-1]
 landHandoffDirectory = appDirectory[0]+"handoff\\lands\\"
@@ -57,46 +52,58 @@ oldExtractsDirectory = stagingDirectory+"1lastpublish\\v101\\" #eventually repla
 templateDirectory = appDirectory[0]+"mastertemplate\\"
 stagingStatePath = stagingDirectory + stateAbbr + '\\' #possibly replace with it own main directory - new publish?
 
+
+
+arcpy.AddMessage('--------------------------------')
+arcpy.AddMessage("Processing "+StateFull.upper())
+arcpy.AddMessage('--------------------------------')
+
 #finding Handoff information for newest target state
 landHandoffList = os.listdir(landHandoffDirectory) #list of files like 20170924_NE_Handoff.gdb
 for handoffFile in sorted(landHandoffList,reverse=True):
 	landTar = handoffFile.split('_')[1]
 	if landTar.upper==stateAbbr: #if the handoff state abbreviation is equal to the state abbreviation of the SD file 
 		DateStamp_HandoffGDB = handoffFile.split('_')[0]
+		arcpy.AddMessage(DateStamp_HandoffGDB)
 		HandoffGDB = handoffFile#not a fully needed step really
 		arcpy.AddMessage(stateAbbr+ " Handoff GDB located,datestamp : "+DateStamp_HandoffGDB)
 ##		print stateAbbr+ " Handoff GDB located,datestamp : "+DateStamp_HandoffGDB
 		break
-arcpy.AddMessage ("\tHANDOFF GDB: "+HandoffGDB)
+arcpy.AddMessage ("\tHANDOFF GDB: "+handoffFile)
 ##print "\tHANDOFF GDB: "+HandoffGDB
-handoffGDBpath = landHandoffDirectory+HandoffGDB
+handoffGDBpath = landHandoffDirectory+handoffFile
+arcpy.AddMessage('Handoff path = '+handoffGDBpath)
 
 
-gmuList = os.listdir(gmuHandoffDirectory) #list of files like 20170922_NE_GMU.gdb
-for gmuFile in sorted(gmuList,reverse=True):
-	gmuTar = gmuFile.split('_')[1]
-	if gmuTar.upper==stateAbbr:
-		DateStamp_GMUGDB = gmuFile.split('_')[0]
-		gmuGDB=gmuFile
-		arcpy.AddMessage(stateAbbr+ " GMU GDB located,datestamp : "+DateStamp_HandoffGDB)
-		break
-arcpy.AddMessage ("\tGMU GDB: "+gmuGDB)
-gmuGDBpath = gmuHandoffDirectory+gmuGDB
+##gmuList = os.listdir(gmuHandoffDirectory) #list of files like 20170922_NE_GMU.gdb
+##for gmuFile in sorted(gmuList,reverse=True):
+##	gmuTar = gmuFile.split('_')[1]
+##	if gmuTar.upper==stateAbbr:
+##		DateStamp_GMUGDB = gmuFile.split('_')[0]
+##		gmuGDB=gmuFile
+##		arcpy.AddMessage(stateAbbr+ " GMU GDB located,datestamp : "+DateStamp_HandoffGDB)
+##		break
+##arcpy.AddMessage ("\tGMU GDB: "+gmuFile)
+##gmuGDBpath = gmuHandoffDirectory+gmuFile
 
 #finding old GDB information
-oldPubList = os.listdir(oldExtractsDirectory)
-for oldPub in sorted(oldPubList,reverse=True):
-	if oldPub.endswith(".gdb"):
-		oldState = oldPub.split('_')[1]#20170828_ri_publish.gdb
-		if oldState.upper()==stateAbbr:
-			DateStamp_OldePublishGDB = oldPub.split('_')[0]
-			OldePublishGDB = oldPub#not a fully needed step really
-			arcpy.AddMessage(stateAbbr+ " Old Publish GDB located,datestamp : "+DateStamp_OldePublishGDB)
-	##		print stateAbbr+ " Old Publish GDB located,datestamp : "+DateStamp_OldePublishGDB
-			break
-arcpy.AddMessage ("\tOLD GDB: "+OldePublishGDB)
-##print "\tOld GDB: "+OldePublishGDB
-OldePublishGDBpath = oldExtractsDirectory+OldePublishGDB
+if arcpy.Exists(oldExtractsDirectory):
+	oldPubList = os.listdir(oldExtractsDirectory)
+	for oldPub in sorted(oldPubList,reverse=True):
+		if oldPub.endswith(".gdb"):
+			oldState = oldPub.split('_')[1]#20170828_ri_publish.gdb
+			if oldState.upper()==stateAbbr:
+				DateStamp_OldePublishGDB = oldPub.split('_')[0]
+				OldePublishGDB = oldPub#not a fully needed step really
+				arcpy.AddMessage(stateAbbr+ " Old Publish GDB located,datestamp : "+DateStamp_OldePublishGDB)
+		##		print stateAbbr+ " Old Publish GDB located,datestamp : "+DateStamp_OldePublishGDB
+				break
+	arcpy.AddMessage ("\tOLD GDB: "+OldePublishGDB)
+	##print "\tOld GDB: "+OldePublishGDB
+	OldePublishGDBpath = oldExtractsDirectory+OldePublishGDB
+if not arcpy.Exists(oldExtractsDirectory):
+	arcpy.AddMessage('\tEXTRACT THE SD FILE BEFORE RUNNING THIS SCRIPT')
+	sys.exit()
 
 
 #finding old MXD information
@@ -111,9 +118,9 @@ for oldPub2 in sorted(oldPubList,reverse=True):
 			arcpy.AddMessage(StateFull+ " Old Publish MXD located,datestamp : "+DateStamp_OldePublishMXD+",version # : "+Version_OldePublishMXD)
 ##			print stateAbbr+ " Old Publish MXD located,datestamp : "+DateStamp_OldePublishMXD+",version # : "+Version_OldePublishMXD
 			break
-arcpy.AddMessage ("\tOLD MXD: "+OldePublishMXD)
+arcpy.AddMessage ("\tOLD MXD: "+oldPub2)
 ##print "\tOld MXD: "+OldePublishMXD
-OldePublishMXDpath = oldExtractsDirectory+OldePublishMXD
+OldePublishMXDpath = oldExtractsDirectory+oldPub2
 
 
 #finding master template info
@@ -126,9 +133,9 @@ for mTemplateMXD in sorted (templateList,reverse=True):
 ##		print "Master Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate
 		break
 #Datestamp_MasterPublishTemplate = #'20160628' - OLD MANUAL ENTRY
-arcpy.AddMessage ("\tMASTER TEMPLATE MXD: "+TemplateMXD)
+arcpy.AddMessage ("\tMASTER TEMPLATE MXD: "+mTemplateMXD)
 ##print "\tMASTER TEMPLATE MXD: "+TemplateMXD
-mTemplateMXDpath=templateDirectory+TemplateMXD
+mTemplateMXDpath=templateDirectory+mTemplateMXD
 
 
 for mTemplateGDB in sorted (templateList,reverse=True):
@@ -139,13 +146,10 @@ for mTemplateGDB in sorted (templateList,reverse=True):
 ##		print "Master Template gdb located, datestamp : "+Datestamp_MasterPublishTemplate
 		break
 #Datestamp_MasterPublishTemplate = #'20160628' - OLD MANUAL ENTRY
-arcpy.AddMessage ("\tMASTER TEMPLATE GDB: "+TemplateGDB)
+arcpy.AddMessage ("\tMASTER TEMPLATE GDB: "+mTemplateGDB)
 ##print "\tMASTER TEMPLATE GDB: "+TemplateGDB
-mTemplateGDBpath=templateDirectory+TemplateGDB
+mTemplateGDBpath=templateDirectory+mTemplateGDB
 
-
-today = datetime.date.today()
-DateStamp_Today = today.strftime('%Y%m%d')
 
 # SECONDARY variables, which may need to changed/verified (but hopefully not) ahead of running this script
 ##NetworkDirectory = 'G:/Products/ArcServer/PRODUCTION_DATA/'
@@ -166,9 +170,8 @@ DateStamp_Today = today.strftime('%Y%m%d')
 #HandoffGDB = local_path+DateStamp_HandoffGDB+'_'+stateAbbr+'_Handoff.gdb'  -- DEFINED ABOVE
 #TemplateGDB = LocalDirectory+'!MasterPublishTemplate/'+Datestamp_MasterPublishTemplate+'_MasterPublishTemplate.gdb' -- DEFINED ABOVE
 #TemplateMXD = LocalDirectory+'!MasterPublishTemplate/'+Datestamp_MasterPublishTemplate+'_MasterPublishTemplate.mxd'  -- DEFINED ABOVE
-##PublishGDB = stagingStatePath+DateStamp_Today+'_'+stateAbbr+'_Publish.gdb'
-##PublishMXD = stagingStatePath+DateStamp_Today+'_'+StateFull+'_'+Version+'.mxd'
-
+#PublishGDB = stagingStatePath+DateStamp_Today+'_'+stateAbbr+'_Publish.gdb' -- DEFINED BELOW
+#PublishMXD = stagingStatePath+DateStamp_Today+'_'+StateFull+'_'+Version+'.mxd' -- DEFINED BELOW
 
 arcpy.AddMessage('--------------------------------')
 arcpy.AddMessage('CHECKING PREREQUISITES AND CREATING NEW PUBLISH GEODATABASE')
@@ -205,10 +208,10 @@ if not arcpy.Exists(handoffGDBpath):
 ##	arcpy.Copy_management(HandoffGDB_Network,HandoffGDB)
 	arcpy.AddMessage('\tPlease pull down the newest Handoff Files from GOOGLE STORAGE')
 ##	sys.exit()
-	# Delete HandoffGDB_Network in the future after it is copied local? Just an idea; throwing it out there.
 
 arcpy.AddMessage('CHECKING PREREQUISITES AND CREATING NEW PUBLISH GEODATABASE COMPLETE')
 arcpy.AddMessage('--------------------------------')
+
 
 arcpy.AddMessage('--------------------------------')
 arcpy.AddMessage('FEATURE DATASET CREATION')
@@ -216,37 +219,6 @@ arcpy.AddMessage('FEATURE DATASET CREATION')
 
 # Define the feature datasets from the OldePublishGDB which you desire to copy into the HandoffGDB:  ## this should be done in to the new Publish GDB leaving the handoff raw
 WebMercator = arcpy.SpatialReference(3857)
-
-### /GMUs/ --- maybe use * in path designation to get both?
-##GMUs_OldePublishGDB = OldePublishGDBpath+ '/GMUs' 
-##if arcpy.Exists(GMUs_OldePublishGDB):
-##	arcpy.CreateFeatureDataset_management(PublishGDBpath, "GMUs", WebMercator)
-##	arcpy.AddMessage('/GMUs feature dataset created, becasue it exists in the OldePublishGDB')
-####	print '/GMUs feature dataset created, becasue it exists in the OldePublishGDB'
-##if not arcpy.Exists(GMUs_OldePublishGDB):
-####	print 'No /GMUs found for '+StateFull
-##	arcpy.AddMessage('\tNo /GMUs feature dataset (note the "s") found for '+StateFull)
-##
-### /GMU/
-##GMU_OldePublishGDB = OldePublishGDBpath+ '/GMU' 
-##if arcpy.Exists(GMU_OldePublishGDB):
-##	arcpy.CreateFeatureDataset_management(PublishGDBpath, 'GMUs', WebMercator)
-##	arcpy.AddMessage('/GMU feature dataset created, becasue it exists in the OldePublishGDB')
-####	print '/GMU feature dataset created, becasue it exists in the OldePublishGDB'
-##if not arcpy.Exists(GMU_OldePublishGDB):
-##	arcpy.AddMessage('\tNo /GMU feature dataset (note the "s" or lack of) found for '+StateFull)
-####	print 'No /GMU found for '+StateFull
-##
-### /Other/
-##Other_OldePublishGDB = OldePublishGDBpath+ '/Other' 
-##if arcpy.Exists(Other_OldePublishGDB):
-##	arcpy.CreateFeatureDataset_management(PublishGDBpath, "Other", WebMercator)
-##	arcpy.AddMessage('/Other feature dataset created, becasue it exists in the OldePublishGDB')
-####	print '/Other feature dataset created, becasue it exists in the OldePublishGDB'
-##if not arcpy.Exists(Other_OldePublishGDB):
-##	arcpy.AddMessage('\tNo /Other feature dataset found for '+StateFull)
-####	print 'No /Other found for '+StateFull
-
 # /All the standard groups/
 
 #logic for MT??? -- if stateAbbr.upper == MT: then create HD_Portions
@@ -266,46 +238,45 @@ arcpy.AddMessage('--------------------------------')
 
 arcpy.AddMessage('--------------------------------')
 arcpy.AddMessage('COPYING HANDOFF DATA TO THE NEW PUBLISH GDB')
-arcpy.env.workspace = handoffGDBpath
 
-parcelDataset = arcpy.ListDatasets('*Private*','feature')
-for pParcels in parcelDataset:
-	for parcelFeature in arcpy.ListFeatureClasses(feature_dataset=pParcels):
-		path2Parcels = os.path.join(arcpy.env.workspace, pParcels, parcelFeature)
-		arcpy.FeatureClassToGeodatabase_conversion(path2Parcels,PublishGDBpath+'\\PrivateParcels')
-		arcpy.AddMessage('\tCopied Parcels from '+ handoffGDBpath+ ' to:\n'+path2Parcels)
-
-
-govDataset = arcpy.ListDatasets('*Gov*','feature')
-for govLands in govDataset:
-	for govFeature in arcpy.ListFeatureClasses(feature_dataset=govLands):
-		path2Govs = os.path.join(arcpy.env.workspace, govLands, govFeature)
-		arcpy.FeatureClassToGeodatabase_conversion(path2Govs,PublishGDBpath+'\\GovLands')
-		arcpy.AddMessage('\tCopied GovLands from '+ handoffGDBpath+ ' to:\n'+path2Govs)
-
-
-posDataset = arcpy.ListDatasets('*Possible*','feature')
-for posAccs in posDataset:
-	for posFeature in arcpy.ListFeatureClasses(feature_dataset=posAccs):
-		path2Poss = os.path.join(arcpy.env.workspace, posAccs, posFeature)
-		arcpy.FeatureClassToGeodatabase_conversion(path2Poss,PublishGDBpath+'\\PossibleAccess')
-		arcpy.AddMessage('\tCopied PossibleAccess from '+ handoffGDBpath+ ' to:\n'+path2Poss)
-
+if arcpy.Exists(handoffGDBpath):
+	arcpy.AddMessage('\tCopying the LAND handoff for '+StateFull)
+	arcpy.Copy_management(handoffGDBpath,PublishGDBpath)
+if not arcpy.Exists(handoffGDBpath):
+	arcpy.AddMessage('\tThere is no LAND handoff for '+StateFull)
 
 arcpy.AddMessage('COPYING HANDOFF DATA TO THE NEW PUBLISH GDB COMPLETE')
 arcpy.AddMessage('--------------------------------')
 
 
 
-arcpy.AddMessage('--------------------------------')
-arcpy.AddMessage('COPYING HUNT DATA TO THE NEW PUBLISH GDB')
-arcpy.env.workspace = handoffGDBpath
-
-#find all the datasets in the GMU gdb and copy them into the dataset in the new publish GDB
-
-
-arcpy.AddMessage('COPYING HUNT DATA TO THE NEW PUBLISH GDB COMPLETE')
-arcpy.AddMessage('--------------------------------')
+##arcpy.AddMessage('--------------------------------')
+##arcpy.AddMessage('COPYING HUNT DATA TO THE NEW PUBLISH GDB')
+##
+##if arcpy.Exists(gmuGDBpath):
+##	arcpy.env.workspace = gmuGDBpath
+##	gmuDataset = arcpy.ListDatasets('*GMU*','feature')
+##	for gmus in gmuDataset:
+##		for gmuFeature in arcpy.ListFeatureClasses(feature_dataset=gmus):
+##			path2Gmus = os.path.join(arcpy.env.workspace, gmus, gmuFeature)
+##			arcpy.FeatureClassToGeodatabase_conversion(path2Gmus,PublishGDBpath+'\\GMUs')
+##			arcpy.AddMessage('\tCopied GMUs from '+ gmuGDBpath+ ' to:\n'+PublishGDBpath+'\\GMUs')
+##	Other_OldePublishGDB = OldePublishGDBpath+ '/Other' 
+##	if arcpy.Exists(Other_OldePublishGDB):
+##		otherDataset = arcpy.ListDatasets('*Other*','feature')
+##		for others in otherDataset:
+##			for otherFeature in arcpy.ListFeatureClasses(feature_dataset=others):
+##				path2Others = os.path.join(arcpy.env.workspace, others, otherFeature)
+##				arcpy.FeatureClassToGeodatabase_conversion(path2Others,PublishGDBpath+'\\Other')
+##				arcpy.AddMessage('\tCopied Others from '+ gmuGDBpath+ ' to:\n'+PublishGDBpath+'\\Other')
+##	if not arcpy.Exists(Other_OldePublishGDB):
+##		arcpy.AddMessage('\tNo /Other feature dataset found for '+StateFull)
+##	##	print 'No /Other found for '+StateFull
+##if not arcpy.Exists(gmuGDBpath):
+##	arcpy.AddMessage('There is no GMU handoff for '+StateFull)
+##
+##arcpy.AddMessage('COPYING HUNT DATA TO THE NEW PUBLISH GDB COMPLETE')
+##arcpy.AddMessage('--------------------------------')
 
 
 
@@ -358,7 +329,7 @@ arcpy.AddMessage('--------------------------------')
 arcpy.AddMessage('GEODATABASE REPLICATION; arcpy.mapping MAGICS')
 
 # Duplicate the HandoffGDB to become the PublishGDB
-arcpy.Copy_management(handoffGDBpath,PublishGDBpath)#will this work with an existing GDB there????
+##arcpy.Copy_management(handoffGDBpath,PublishGDBpath)#will this work with an existing GDB there????
 arcpy.AddMessage('HandoffGDB duplicated into PublishGDB')
 
 
