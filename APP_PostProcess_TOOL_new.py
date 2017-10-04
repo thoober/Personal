@@ -238,6 +238,7 @@ if arcpy.Exists(Wilderness_OldePublishGDB):
 	arcpy.CreateFeatureDataset_management(handoffGDBpath,"Wilderness",WebMercator)
 	arcpy.AddMessage('/Wilderness feature dataset created')
 ##		print '/Wilderness feature dataset created'
+	
 	Wilderness_Lines_OldePublishGDB=Wilderness_OldePublishGDB+'/'+State+'_Wilderness_Boundaries'
 	arcpy.FeatureClassToFeatureClass_conversion(Wilderness_Lines_OldePublishGDB, handoffGDBpath+'\\Wilderness\\', State+'_Wilderness_Boundaries')
 	arcpy.AddMessage('\tWilderness lines imported into the HandoffGDB from the Old Publish GDB')
