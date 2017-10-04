@@ -337,19 +337,19 @@ arcpy.AddMessage('HandoffGDB duplicated into PublishGDB')
 mxd = arcpy.mapping.MapDocument(mTemplateMXDpath)
 mxd.replaceWorkspaces(mTemplateGDBpath, "FILEGDB_WORKSPACE", PublishGDBpath, "FILEGDB_WORKSPACE")
 
-if arcpy.Exists(handoffGDBpath+'/Wilderness/'):
-	for lyr in arcpy.mapping.ListLayers(mxd):
-		if lyr.name== "Wilderness Boundaries":
-			lyr.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE", stateAbbr+'_Wilderness_Boundaries')
-		if lyr.name== "Wilderness Areas":
-			lyr.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE", stateAbbr+'_Wilderness_Areas')
-
-if arcpy.Exists(handoffGDBpath+'/Sections/'):
-	for layer in arcpy.mapping.ListLayers(mxd):
-		if layer.name=="Section Boundaries":
-			layer.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE",'Section_Boundaries')
-		if layer.name=="Section Areas":
-			layer.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE",'Section_Areas')
+##if arcpy.Exists(handoffGDBpath+'/Wilderness/'):
+##	for lyr in arcpy.mapping.ListLayers(mxd):
+##		if lyr.name== "Wilderness Boundaries":
+##			lyr.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE", stateAbbr+'_Wilderness_Boundaries')
+##		if lyr.name== "Wilderness Areas":
+##			lyr.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE", stateAbbr+'_Wilderness_Areas')
+##
+##if arcpy.Exists(handoffGDBpath+'/Sections/'):
+##	for layer in arcpy.mapping.ListLayers(mxd):
+##		if layer.name=="Section Boundaries":
+##			layer.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE",'Section_Boundaries')
+##		if layer.name=="Section Areas":
+##			layer.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE",'Section_Areas')
 
 mxd.saveACopy(PublishMXD)
 arcpy.AddMessage('TemplateMXD used to create the new PublishMXD for '+StateFull)
