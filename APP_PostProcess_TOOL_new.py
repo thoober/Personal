@@ -23,13 +23,13 @@ arcpy.env.outputMFlag = "Disabled"		# Disables M-values
 
 # PRIMARY variables, which must be changed/verified ahead of running this script
 Version = arcpy.GetParameterAsText(0) #'160'
-sdFile = arcpy.GetParameterAsText(1)#"D:\sd-files\live\20170801_SouthDakota_170.sd"
+sdFile = arcpy.GetParameterAsText(1)#"C:\sd-files\staging\20171003_Oklahoma_17x2.sd"
 today = datetime.date.today()
 DateStamp_Today = today.strftime('%Y%m%d')
 
 #FOR TESTING
-##Version = "TESTING"
-##sdFile = "C:\sd-files\staging\20170725_Wyoming_Yellowstone_1711.sd"
+#Version = "TESTING"
+#sdFile = "C:\sd-files\staging\20171003_Oklahoma_17x2.sd"
 
 sdState= sdFile.split('_')[1]
 if sdState == "Wyoming":
@@ -62,23 +62,26 @@ arcpy.AddMessage('--------------------------------')
 landHandoffList = os.listdir(landHandoffDirectory) #list of files like 20170924_NE_Handoff.gdb
 for handoffFile in sorted(landHandoffList,reverse=True):
 	landTar = handoffFile.split('_')[1]
-	if landTar.upper==stateAbbr: #if the handoff state abbreviation is equal to the state abbreviation of the SD file 
+#	arcpy.AddMessage (landTar+" is what is in the lands handoff")
+#	arcpy.AddMessage (stateAbbr+ " is what the target state is")
+	if landTar.upper()==stateAbbr: #if the handoff state abbreviation is equal to the state abbreviation of the SD file 
 		DateStamp_HandoffGDB = handoffFile.split('_')[0]
 		arcpy.AddMessage(DateStamp_HandoffGDB)
 		HandoffGDB = handoffFile#not a fully needed step really
+		arcpy.AddMessage ("\tHANDOFF GDB: "+HandoffGDB)
 		arcpy.AddMessage(stateAbbr+ " Handoff GDB located,datestamp : "+DateStamp_HandoffGDB)
 ##		print stateAbbr+ " Handoff GDB located,datestamp : "+DateStamp_HandoffGDB
 		break
-arcpy.AddMessage ("\tHANDOFF GDB: "+handoffFile)
+arcpy.AddMessage ("\tHANDOFF GDB: "+HandoffGDB)
 ##print "\tHANDOFF GDB: "+HandoffGDB
-handoffGDBpath = landHandoffDirectory+handoffFile
-arcpy.AddMessage('Handoff path = '+handoffGDBpath)
+handoffGDBpath = landHandoffDirectory+HandoffGDB
+arcpy.AddMessage('\t\t'+handoffGDBpath)
 
 
 ##gmuList = os.listdir(gmuHandoffDirectory) #list of files like 20170922_NE_GMU.gdb
 ##for gmuFile in sorted(gmuList,reverse=True):
 ##	gmuTar = gmuFile.split('_')[1]
-##	if gmuTar.upper==stateAbbr:
+##	if gmuTar.upper()==stateAbbr:
 ##		DateStamp_GMUGDB = gmuFile.split('_')[0]
 ##		gmuGDB=gmuFile
 ##		arcpy.AddMessage(stateAbbr+ " GMU GDB located,datestamp : "+DateStamp_HandoffGDB)
@@ -95,48 +98,62 @@ if arcpy.Exists(oldExtractsDirectory):
 			if oldState.upper()==stateAbbr:
 				DateStamp_OldePublishGDB = oldPub.split('_')[0]
 				OldePublishGDB = oldPub#not a fully needed step really
-				arcpy.AddMessage(stateAbbr+ " Old Publish GDB located,datestamp : "+DateStamp_OldePublishGDB)
+				arcpy.AddMessage(stateAbbr+ " Old Publish GDB located, datestamp : "+DateStamp_OldePublishGDB)
 		##		print stateAbbr+ " Old Publish GDB located,datestamp : "+DateStamp_OldePublishGDB
 				break
 	arcpy.AddMessage ("\tOLD GDB: "+OldePublishGDB)
 	##print "\tOld GDB: "+OldePublishGDB
 	OldePublishGDBpath = oldExtractsDirectory+OldePublishGDB
+	arcpy.AddMessage ('\t\t'+OldePublishGDBpath)
 if not arcpy.Exists(oldExtractsDirectory):
 	arcpy.AddMessage('\tEXTRACT THE SD FILE BEFORE RUNNING THIS SCRIPT')
 	sys.exit()
 
 
 #finding old MXD information
-oldPubList2 = os.listdir(oldExtractsDirectory)
-for oldPub2 in sorted(oldPubList,reverse=True):
-	if oldPub2.endswith(".mxd"):
-		oldState2 = oldPub.split('_')[1]#20170828_RhodeIsland_1701
-		if oldState2 == StateFull:
-			DateStamp_OldePublishMXD = oldPub2.split(StateFull)[0]
-			Version_OldePublishMXD = (oldPub2.split(StateFull)[1]).split('.')[0]
-			OldePublishMXD = oldPub2#not a fully needed step really
-			arcpy.AddMessage(StateFull+ " Old Publish MXD located,datestamp : "+DateStamp_OldePublishMXD+",version # : "+Version_OldePublishMXD)
-##			print stateAbbr+ " Old Publish MXD located,datestamp : "+DateStamp_OldePublishMXD+",version # : "+Version_OldePublishMXD
-			break
-arcpy.AddMessage ("\tOLD MXD: "+oldPub2)
+if arcpy.Exists(oldExtractsDirectory):
+	oldPubList2 = os.listdir(oldExtractsDirectory)
+	for oldPub2 in sorted(oldPubList2,reverse=True):
+		# arcpy.AddMessage(oldPub2+ " is a item in the old publish directory")
+		if oldPub2.endswith(".mxd"):
+			#arcpy.AddMessage("\t"+oldPub2+ " this one is an mxd")
+			oldState2 = oldPub2.split('_')[1]#20170828_RhodeIsland_1701
+			#arcpy.AddMessage("\t"+oldState2+" is the target old MXD")
+			#arcpy.AddMessage("\t"+StateFull+" is the state from the SD File")
+			#arcpy.AddMessage("\t"+stateAbbr+" is the abbreviation for the state from the SD File")
+			if oldState2==StateFull:
+				#arcpy.AddMessage(oldState2()+"(from Extract) is equal to "+stateAbbr+ " (from the SD file)")
+				#arcpy.AddMessage(oldPub2+" this is the target")
+				DateStamp_OldePublishMXD = oldPub2.split('_')[0]
+				Version_OldePublishMXD = (oldPub2.split('_')[2]).split('.')[0]
+				OldePublishMXD = oldPub2#not a fully needed step really
+				arcpy.AddMessage(StateFull+ " Old Publish MXD located, datestamp : "+DateStamp_OldePublishMXD+", version # : "+Version_OldePublishMXD)
+	##			print stateAbbr+ " Old Publish MXD located,datestamp : "+DateStamp_OldePublishMXD+",version # : "+Version_OldePublishMXD
+				break
+arcpy.AddMessage ("\tOLD MXD: "+OldePublishMXD)
 ##print "\tOld MXD: "+OldePublishMXD
-OldePublishMXDpath = oldExtractsDirectory+oldPub2
+OldePublishMXDpath = oldExtractsDirectory+OldePublishMXD
+arcpy.AddMessage ('\t\t'+OldePublishMXDpath)
 
 
 #finding master template info
-templateList = os.listdir(templateDirectory)
-for mTemplateMXD in sorted (templateList,reverse=True):
-	if mTemplateMXD.endswith('.mxd'):
-		Datestamp_MasterPublishTemplate = mTemplateMXD.split('_')[0]#20170516_MasterPublishTemplate
-		TemplateMXD = mTemplateMXD#not a fully needed step really
-		arcpy.AddMessage("Master Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate)
-##		print "Master Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate
-		break
+if arcpy.Exists(templateDirectory):
+	templateList = os.listdir(templateDirectory)
+	for mTemplateMXD in sorted (templateList,reverse=True):
+		if mTemplateMXD.endswith('.mxd'):
+			Datestamp_MasterPublishTemplate = mTemplateMXD.split('_')[0]#20170516_MasterPublishTemplate
+			TemplateMXD = mTemplateMXD#not a fully needed step really
+			arcpy.AddMessage("Master Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate)
+	##		print "Master Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate
+			break
 #Datestamp_MasterPublishTemplate = #'20160628' - OLD MANUAL ENTRY
 arcpy.AddMessage ("\tMASTER TEMPLATE MXD: "+mTemplateMXD)
 ##print "\tMASTER TEMPLATE MXD: "+TemplateMXD
 mTemplateMXDpath=templateDirectory+mTemplateMXD
-
+arcpy.AddMessage('\t\t'+mTemplateMXDpath)
+if not arcpy.Exists (templateDirectory):
+	arcpy.AddMessage("The Master Template Directory is not where it is expected, which is here \n\t+"+templateDirectory)
+	sys.exit()
 
 for mTemplateGDB in sorted (templateList,reverse=True):
 	if mTemplateGDB.endswith('.gdb'):
@@ -149,6 +166,7 @@ for mTemplateGDB in sorted (templateList,reverse=True):
 arcpy.AddMessage ("\tMASTER TEMPLATE GDB: "+mTemplateGDB)
 ##print "\tMASTER TEMPLATE GDB: "+TemplateGDB
 mTemplateGDBpath=templateDirectory+mTemplateGDB
+arcpy.AddMessage('\t\t'+mTemplateGDBpath)
 
 
 # SECONDARY variables, which may need to changed/verified (but hopefully not) ahead of running this script
@@ -351,14 +369,14 @@ mxd.replaceWorkspaces(mTemplateGDBpath, "FILEGDB_WORKSPACE", PublishGDBpath, "FI
 ##		if layer.name=="Section Areas":
 ##			layer.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE",'Section_Areas')
 
-mxd.saveACopy(PublishMXD)
+mxd.saveACopy(PublishMXDpath)
 arcpy.AddMessage('TemplateMXD used to create the new PublishMXD for '+StateFull)
 ##print 'TemplateMXD used to create the new PublishMXD for '+StateFull
 
 # Open that recently created PublishMXD to begin manual inspection of the data
 # And the OldePublishMXD to compare the PublishMXD to
 os.startfile(OldePublishMXDpath)
-os.startfile(PublishMXD)
+os.startfile(PublishMXDpath)
 arcpy.AddMessage("Wasn't that sweet! Those ArcMaps opened magically all on their own, dude!")
 
 arcpy.AddMessage('GEODATABASE REPLICATION; arcpy.mapping MAGICS COMPLETE')
