@@ -78,13 +78,13 @@ if arcpy.Exists(landHandoffDirectory):
 			HandoffGDB = handoffFile
 			arcpy.AddMessage ("\tHANDOFF GDB: "+HandoffGDB)
 			arcpy.AddMessage(stateAbbr+ " Handoff GDB located,datestamp : "+DateStamp_HandoffGDB)
-			print stateAbbr+ " Handoff GDB located,datestamp : "+DateStamp_HandoffGDB
+			##print stateAbbr+ " Handoff GDB located,datestamp : "+DateStamp_HandoffGDB
 			break
 arcpy.AddMessage ("\tHANDOFF GDB: "+HandoffGDB)
-print "\tHANDOFF GDB: "+HandoffGDB
+##print "\tHANDOFF GDB: "+HandoffGDB
 handoffGDBpath = landHandoffDirectory+HandoffGDB
 arcpy.AddMessage('\t\t'+handoffGDBpath)
-print "\t\t"+handoffGDBpath
+##print "\t\t"+handoffGDBpath
 
 
 ##if arcpy.Exists(gmuHandoffDirectory):
@@ -107,13 +107,13 @@ if arcpy.Exists(oldExtractsDirectory):
 			DateStamp_OldePublishGDB = oldPub.split('_')[0]
 			OldePublishGDB = oldPub
 			arcpy.AddMessage(stateAbbr+ " Old Publish GDB located, datestamp : "+DateStamp_OldePublishGDB)
-			print stateAbbr+ " Old Publish GDB located,datestamp : "+DateStamp_OldePublishGDB
+			##print stateAbbr+ " Old Publish GDB located,datestamp : "+DateStamp_OldePublishGDB
 			break
 	arcpy.AddMessage ("\tOLD GDB: "+OldePublishGDB)
-	print "\tOld GDB: "+OldePublishGDB
+	##print "\tOld GDB: "+OldePublishGDB
 	OldePublishGDBpath = oldExtractsDirectory+OldePublishGDB
 	arcpy.AddMessage ('\t\t'+OldePublishGDBpath)
-	print '\t\t'+OldePublishGDBpath
+	##print '\t\t'+OldePublishGDBpath
 if not arcpy.Exists(oldExtractsDirectory):
 	arcpy.AddMessage('\tEXTRACT THE SD FILES BEFORE RUNNING THIS SCRIPT')
 	sys.exit()
@@ -129,13 +129,13 @@ for oldPub2 in oldPubList2:
 		Version_OldePublishMXD = (oldPub2.split('_')[2]).split('.')[0]
 		OldePublishMXD = oldPub2
 		arcpy.AddMessage(StateFull+ " Old Publish MXD located, datestamp : "+DateStamp_OldePublishMXD+", version # : "+Version_OldePublishMXD)
-		print StateFull+ " Old Publish MXD located,datestamp : "+DateStamp_OldePublishMXD+",version # : "+Version_OldePublishMXD
+		##print StateFull+ " Old Publish MXD located,datestamp : "+DateStamp_OldePublishMXD+",version # : "+Version_OldePublishMXD
 		break
 arcpy.AddMessage ("\tOLD MXD: "+OldePublishMXD)
-print "\tOld MXD: "+OldePublishMXD
+##print "\tOld MXD: "+OldePublishMXD
 OldePublishMXDpath = oldExtractsDirectory+OldePublishMXD
 arcpy.AddMessage ('\t\t'+OldePublishMXDpath)
-print '\t\t'+OldePublishMXDpath
+##print '\t\t'+OldePublishMXDpath
 
 
 #finding master template info
@@ -146,14 +146,14 @@ if arcpy.Exists(templateDirectory):
 			Datestamp_MasterPublishTemplate = mTemplateMXD.split('_')[0]#20170516_MasterPublishTemplate
 			TemplateMXD = mTemplateMXD
 			arcpy.AddMessage("Master Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate)
-			print "Master Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate
+			##print "Master Template mxd located, datestamp : "+Datestamp_MasterPublishTemplate
 			break
 #Datestamp_MasterPublishTemplate = #'20160628' - OLD MANUAL ENTRY
 arcpy.AddMessage ("\tMASTER TEMPLATE MXD: "+mTemplateMXD)
-print "\tMASTER TEMPLATE MXD: "+TemplateMXD
+##print "\tMASTER TEMPLATE MXD: "+TemplateMXD
 mTemplateMXDpath=templateDirectory+mTemplateMXD
 arcpy.AddMessage('\t\t'+mTemplateMXDpath)
-print '\t\t'+mTemplateMXDpath
+##print '\t\t'+mTemplateMXDpath
 if not arcpy.Exists (templateDirectory):
 	arcpy.AddMessage("The Master Template Directory is not where it is expected, which is here \n\t+"+templateDirectory)
 	sys.exit()
@@ -163,14 +163,14 @@ for mTemplateGDB in sorted (templateList,reverse=True):
 		Datestamp_MasterPublishTemplate = mTemplateGDB.split('_')[0]
 		TemplateGDB = mTemplateGDB
 		arcpy.AddMessage("Master Template gdb located, datestamp : "+Datestamp_MasterPublishTemplate)
-		print "Master Template gdb located, datestamp : "+Datestamp_MasterPublishTemplate
+		##print "Master Template gdb located, datestamp : "+Datestamp_MasterPublishTemplate
 		break
 #Datestamp_MasterPublishTemplate = #'20160628' - OLD MANUAL ENTRY
 arcpy.AddMessage ("\tMASTER TEMPLATE GDB: "+mTemplateGDB)
-print "\tMASTER TEMPLATE GDB: "+TemplateGDB
+##print "\tMASTER TEMPLATE GDB: "+TemplateGDB
 mTemplateGDBpath=templateDirectory+mTemplateGDB
 arcpy.AddMessage('\t\t'+mTemplateGDBpath)
-print '\t\t'+mTemplateGDBpath
+##print '\t\t'+mTemplateGDBpath
 
 
 arcpy.AddMessage('--------------------------------')
@@ -190,12 +190,12 @@ arcpy.AddMessage("Created new publish GDB : "+DateStamp_Today+'_'+stateAbbr+'_Pu
 WebMercator = arcpy.SpatialReference(3857)
 
 arcpy.env.workspace = OldePublishGDBpath
-print "Creating FEATURE DATASETS"
+##print "Creating FEATURE DATASETS"
 arcpy.AddMessage("Creating FEATURE DATASETS")
 for oldFeatureDataset in arcpy.ListDatasets(feature_type='Feature'):
 	arcpy.CreateFeatureDataset_management(PublishGDBpath, oldFeatureDataset, WebMercator)
 	arcpy.AddMessage("/t"+oldFeatureDataset+" being created in \n\t\t"+PublishGDBpath)
-	print "/t"+oldFeatureDataset+" being created in \n\t\t"+PublishGDBpath
+	##print "/t"+oldFeatureDataset+" being created in \n\t\t"+PublishGDBpath
 
 arcpy.AddMessage('NEW GDB CREATION & FEATURE DATASET CREATION COMPLETE')
 arcpy.AddMessage('--------------------------------')
