@@ -4,10 +4,10 @@
 #					copies in the olde gdb and olde mxd from the GIS drive, copies the data handoff gdb from the ??? drive, 
 #					creates and copies applicable feature datasets from the olde gdb to the handoff gdb, 
 #					duplicates the handoff gdb to become the publish gdb, and then uses a template mxd to create a new publish gdb.
-#					Lastly, this script opens up both the publish mxd and the olde mxd for comparison.		
+#					Lastly, this script opens up both the publish mxd and the olde mxd for comparison.
 # Authors:	Ross Carlson, Adam Potts, Landon Snyder, Nate Balding, Tom Hoober
 # Created:	July 2014
-# Updated:	Sept 2017
+# Updated:	Oct 2017
 # Copyright:	2017 onXmaps
 #-------------------------------------------------------------------------------
 
@@ -22,14 +22,14 @@ arcpy.env.outputZFlag = "Disabled"		# Disables Z-values
 arcpy.env.outputMFlag = "Disabled"		# Disables M-values
 
 # PRIMARY variables, which must be changed/verified ahead of running this script
-Version = arcpy.GetParameterAsText(0) #'160'
-sdFile = arcpy.GetParameterAsText(1)#"C:\onx-syncs\sd-files\live\20171017_Montana_171.sd"
+##Version = arcpy.GetParameterAsText(0) #'160'
+##sdFile = arcpy.GetParameterAsText(1)#"C:\onx-syncs\sd-files\live\20171017_Montana_171.sd"
 today = datetime.date.today()
 DateStamp_Today = today.strftime('%Y%m%d')
 
-###FOR TESTING
-##Version = "TESTING"
-##sdFile = "C:\\onx-syncs\\sd-files\\live\\20171017_Montana_171.sd"
+#FOR TESTING
+Version = "TESTING"
+sdFile = "D:\\onx-syncs\\sd-files\\live\\20171017_Montana_171.sd"
 
 sdState= sdFile.split('_')[1]
 if sdState == "Wyoming":
@@ -68,7 +68,7 @@ arcpy.AddMessage('--------------------------------')
 #finding Handoff information for newest target state
 if arcpy.Exists(landHandoffDirectory):
 	landHandoffList = os.listdir(landHandoffDirectory) #list of files like 20170924_NE_Handoff.gdb
-	for handoffFile in sorted(landHandoffList,reverse=True):
+	for handoffFile in landHandoffList:
 		landTar = handoffFile.split('_')[1]
 	#	arcpy.AddMessage (landTar+" is what is in the lands handoff")
 	#	arcpy.AddMessage (stateAbbr+ " is what the target state is")
@@ -89,7 +89,7 @@ arcpy.AddMessage('\t\t'+handoffGDBpath)
 
 ##if arcpy.Exists(gmuHandoffDirectory):
 ##	gmuList = os.listdir(gmuHandoffDirectory) #list of files like 20170922_NE_GMU.gdb
-##	for gmuFile in sorted(gmuList,reverse=True):
+##	for gmuFile in gmuList:
 ##		gmuTar = gmuFile.split('_')[1]
 ##		if gmuTar.upper()==stateAbbr:
 ##			DateStamp_GMUGDB = gmuFile.split('_')[0]
@@ -201,7 +201,6 @@ arcpy.AddMessage('NEW GDB CREATION & FEATURE DATASET CREATION COMPLETE')
 arcpy.AddMessage('--------------------------------')
 
 
-
 arcpy.AddMessage('--------------------------------')
 arcpy.AddMessage('COPYING HANDOFF DATA TO THE NEW PUBLISH GDB')
 
@@ -213,7 +212,6 @@ if not arcpy.Exists(handoffGDBpath):
 
 arcpy.AddMessage('COPYING HANDOFF DATA TO THE NEW PUBLISH GDB COMPLETE')
 arcpy.AddMessage('--------------------------------')
-
 
 
 ##arcpy.AddMessage('--------------------------------')
@@ -243,7 +241,6 @@ arcpy.AddMessage('--------------------------------')
 ##
 ##arcpy.AddMessage('COPYING HUNT DATA TO THE NEW PUBLISH GDB COMPLETE')
 ##arcpy.AddMessage('--------------------------------')
-
 
 
 arcpy.AddMessage('--------------------------------')
@@ -296,7 +293,7 @@ arcpy.AddMessage('GEODATABASE REPLICATION; arcpy.mapping MAGICS')
 
 # Duplicate the HandoffGDB to become the PublishGDB
 ##arcpy.Copy_management(handoffGDBpath,PublishGDBpath)#will this work with an existing GDB there????
-arcpy.AddMessage('HandoffGDB duplicated into PublishGDB')
+##arcpy.AddMessage('HandoffGDB duplicated into PublishGDB')
 
 
 # Arcpy.mapping, bitches!
