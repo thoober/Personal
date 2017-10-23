@@ -71,7 +71,7 @@ if arcpy.Exists(landHandoffDirectory):
 	for handoffFile in landHandoffList:
 		landTar = handoffFile.split('_')[1]
 	#	arcpy.AddMessage (landTar+" is what is in the lands handoff")
-	#	arcpy.AddMessage (stateAbbr+ " is what the target state is")
+		# arcpy.AddMessage (stateAbbr+ " is what the target state is")
 		if landTar.upper()==stateAbbr: #if the handoff state abbreviation is equal to the state abbreviation of the SD file 
 			DateStamp_HandoffGDB = handoffFile.split('_')[0]
 			arcpy.AddMessage(DateStamp_HandoffGDB)
@@ -158,7 +158,7 @@ if not arcpy.Exists (templateDirectory):
 	arcpy.AddMessage("The Master Template Directory is not where it is expected, which is here \n\t+"+templateDirectory)
 	sys.exit()
 
-for mTemplateGDB in sorted (templateList,reverse=True):
+for mTemplateGDB in templateList:
 	if mTemplateGDB.endswith('.gdb'):
 		Datestamp_MasterPublishTemplate = mTemplateGDB.split('_')[0]
 		TemplateGDB = mTemplateGDB
@@ -300,19 +300,19 @@ arcpy.AddMessage('GEODATABASE REPLICATION; arcpy.mapping MAGICS')
 mxd = arcpy.mapping.MapDocument(mTemplateMXDpath)
 mxd.replaceWorkspaces(mTemplateGDBpath, "FILEGDB_WORKSPACE", PublishGDBpath, "FILEGDB_WORKSPACE")
 
-##if arcpy.Exists(handoffGDBpath+'/Wilderness/'):
-##	for lyr in arcpy.mapping.ListLayers(mxd):
-##		if lyr.name== "Wilderness Boundaries":
-##			lyr.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE", stateAbbr+'_Wilderness_Boundaries')
-##		if lyr.name== "Wilderness Areas":
-##			lyr.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE", stateAbbr+'_Wilderness_Areas')
-##
-##if arcpy.Exists(handoffGDBpath+'/Sections/'):
-##	for layer in arcpy.mapping.ListLayers(mxd):
-##		if layer.name=="Section Boundaries":
-##			layer.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE",'Section_Boundaries')
-##		if layer.name=="Section Areas":
-##			layer.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE",'Section_Areas')
+if arcpy.Exists(handoffGDBpath+'/Wilderness/'):
+	for lyr in arcpy.mapping.ListLayers(mxd):
+		if lyr.name== "Wilderness Boundaries":
+			lyr.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE", stateAbbr+'_Wilderness_Boundaries')
+		if lyr.name== "Wilderness Areas":
+			lyr.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE", stateAbbr+'_Wilderness_Areas')
+
+if arcpy.Exists(handoffGDBpath+'/Sections/'):
+	for layer in arcpy.mapping.ListLayers(mxd):
+		if layer.name=="Section Boundaries":
+			layer.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE",'Section_Boundaries')
+		if layer.name=="Section Areas":
+			layer.replaceDataSource(PublishGDBpath, "FILEGDB_WORKSPACE",'Section_Areas')
 
 mxd.saveACopy(PublishMXDpath)
 arcpy.AddMessage('TemplateMXD used to create the new PublishMXD for '+StateFull)
